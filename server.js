@@ -65,8 +65,11 @@ app.get('/images', async (req, res) => {
       type: 'upload',
       prefix: 'gallery/', // Lọc ảnh trong thư mục 'gallery'
       resource_type: 'image',
-      context: true, // Lấy context
+      context: true,
+      max_results: 500, // Tăng số lượng ảnh trả về
     });
+
+    console.log(result.resources.length)
     
     const images = result.resources.map(resource => ({
       id: resource.public_id,
