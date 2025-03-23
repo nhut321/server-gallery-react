@@ -313,6 +313,34 @@ const upload = multer({ storage: multer.memoryStorage() }); // Lưu vào RAM
 
 const IMGBB_API_KEY = process.env.IMGBB_API_KEY;
 
+let imageCache = [];
+
+// Hàm preload ảnh từ ImgBB
+const preloadImages = async () => {
+  try {
+    console.log("Preloading images...");
+    const images = await Image.find();
+
+    for (const img of images) {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 300)); // Delay 300ms
+        const response = await axios.get(img.url, { responseType: "arraybuffer" });
+        imageCache.push({ ...img.toObject(), buffer: response.data });
+      } catch (error) {
+        console.error(`Failed to preload image ${img.url}`, error.message);
+      }
+    }
+
+    console.log("Images preloaded successfully!");
+  } catch (error) {
+    console.error("Error preloading images:", error);
+  }
+};
+
+
+// Gọi preloadImages khi server khởi động
+preloadImages();
+
 // Upload ảnh lên ImgBB
 app.post("/upload", async (req, res) => {
   try {
